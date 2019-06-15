@@ -99,20 +99,6 @@ class Rcon {
     _socket.add(authPacket.bytes);
     await _socket.flush();
 
-    /*
-    await _packetStream.firstWhere((Packet p) {
-      if (!(p.type == PacketType.AUTH_RESPONSE)) {
-        return false;
-      }
-
-      if (p.id == -1) {
-        throw new RconAuthenticationFailedException();
-      }
-
-      return p.id == packetId;
-    });
-    */
-
     await firstWhereWithTimeout(
       _packetStream,
       timeout,
@@ -145,11 +131,6 @@ class Rcon {
 
     _socket.add(packet.bytes);
     await _socket.flush();
-
-    /*
-    Packet res = await _packetStream.firstWhere(
-        (Packet p) => p.type == PacketType.RESPONSE_VALUE && p.id == packetId);
-    */
 
     Packet res = await firstWhereWithTimeout(
       _packetStream,
