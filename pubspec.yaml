@@ -1,0 +1,15 @@
+name: mc_rcon
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+homepage: https://github.com/7ixi0/dart-mc_rcon
+author: Dario Crosa <darcros7@gmail.com>
+
+environment:
+  sdk: '>=2.2.0 <3.0.0'
+
+#dependencies:
+#  path: ^1.4.1
+
+dev_dependencies:
+  pedantic: ^1.0.0
+  test: ^1.0.0
