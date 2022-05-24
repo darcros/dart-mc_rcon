@@ -1,11 +1,12 @@
 /// Thrown when the authentication fails
-/// 
+///
 /// This exception gets thrown then the server refuses to authenticate the client,
 /// likely because the password is wrong.
 class AuthenticationFailedException implements Exception {
   AuthenticationFailedException();
 
-  String toString() => "AuthenticationFailedException";
+  @override
+  String toString() => 'AuthenticationFailedException';
 }
 
 /// Thrown when trying to do something without connecting first
@@ -16,21 +17,24 @@ class AuthenticationFailedException implements Exception {
 class NotConnectedException implements Exception {
   NotConnectedException();
 
-  String toString() => "NotConnectedException";
+  @override
+  String toString() => 'NotConnectedException';
 }
 
 /// Thrown then calling connect() but the Rcon instance is already connected
 class AlreadyConnectedException implements Exception {
   AlreadyConnectedException();
 
-  String toString() => "AlreadyConnectedException";
+  @override
+  String toString() => 'AlreadyConnectedException';
 }
 
 /// Thrown when the rcon server fails to respond within the timeout duration
 class TimeoutException implements Exception {
   TimeoutException();
 
-  String toString() => "TimeoutException";
+  @override
+  String toString() => 'TimeoutException';
 }
 
 /// Thrown when trying to deserialize an invalid packet
@@ -38,5 +42,6 @@ class InvalidPacketException implements Exception {
   final String reason;
   InvalidPacketException(this.reason);
 
-  String toString() => "InvalidPacketException: $reason";
+  @override
+  String toString() => 'InvalidPacketException: $reason';
 }

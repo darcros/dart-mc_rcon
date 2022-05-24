@@ -1,16 +1,16 @@
 import 'package:mc_rcon/mc_rcon.dart';
 
-main() async {
-  Rcon rcon;
+void main() async {
+  late Rcon rcon;
   try {
     // connect to the Minecraft server
-    rcon = await Rcon.createAndConnect("localhost", 25575, "password");
+    rcon = await Rcon.createAndConnect('localhost', 25575, 'password');
   } on AuthenticationFailedException {
-    print("wrong password");
+    print('wrong password');
   }
 
-  // send "/help" command and print result
-  String res = await rcon.sendCommand("help");
+  // send '/help' command and print result
+  var res = await rcon.sendCommand('help');
   print(res);
 
   // close connection

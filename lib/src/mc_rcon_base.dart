@@ -6,7 +6,7 @@ import 'package:mc_rcon/src/exceptions.dart';
 import 'package:mc_rcon/src/packet.dart';
 import 'package:mc_rcon/src/util.dart';
 
-// TODO: support multiplacket response
+// TODO: support multipacket response
 
 /// Class Rcon allows to connect and send commads to a rcon sever
 class Rcon {
@@ -22,8 +22,8 @@ class Rcon {
   /// Time that [this] will wait for a response from the server before throwing [RconTimeoutException]
   final timeout;
 
-  Socket _socket;
-  Stream<Packet> _packetStream;
+  late Socket _socket;
+  late Stream<Packet> _packetStream;
   bool _authed = false;
   int _id = 1;
 
@@ -54,8 +54,8 @@ class Rcon {
     String password, {
     timeout = const Duration(seconds: 10),
   }) async {
-    Rcon rcon = new Rcon(host, port, password, timeout: timeout);
-    await rcon.connect();
+    var rcon = Rcon(host, port, password, timeout: timeout);
+    var _ = await rcon.connect();
     return rcon;
   }
 
@@ -63,22 +63,23 @@ class Rcon {
   ///
   /// This methd throws [AuthenticationFailedException] if the server password is wrong.
   /// This method throws [AlreadyConnectedException] if the [Rcon] instace is already connected
-  void connect() async {
+  Future<bool> connect() async {
     if (_authed) {
-      throw new AlreadyConnectedException();
+      throw AlreadyConnectedException();
     }
 
     _socket = await Socket.connect(host, port);
 
-    Stream<Packet> packetStreamSingle = _socket.map<Packet>((List<int> list) {
-      Uint8List byteList = Uint8List.fromList(list);
+    var packetStreamSingle = _socket.map<Packet>((List<int> list) {
+      var byteList = Uint8List.fromList(list);
       return Packet.fromUint8List(byteList);
     });
 
     _packetStream = turnIntoBroadcastStream<Packet>(packetStreamSingle);
 
     // send auth packet
-    await _authenticate();
+    _authed = await _authenticate();
+    return _authed;
   }
 
   /// Closes the connection with the rcon server
@@ -86,17 +87,17 @@ class Rcon {
   /// This method throws [NotConnectedException] if the [Rcon] instace is not connected
   void disconnect() async {
     if (!_authed) {
-      throw new NotConnectedException();
+      throw NotConnectedException();
     }
 
     await _socket.close();
   }
 
-  void _authenticate() async {
-    int packetId = _id++;
-    Packet authPacket = new Packet(packetId, PacketType.AUTH, password);
+  Future<bool> _authenticate() async {
+    var packetId = _id++;
+    var authPacket = Packet(packetId, PacketType.AUTH, password);
 
-    _socket.add(authPacket.bytes);
+    _socket.add(authPacket.bytes!);
     await _socket.flush();
 
     await firstWhereWithTimeout(
@@ -108,31 +109,30 @@ class Rcon {
         }
 
         if (p.id == -1) {
-          throw new AuthenticationFailedException();
+          throw AuthenticationFailedException();
         }
 
         return p.id == packetId;
       },
     );
-
-    _authed = true;
+    return true;
   }
 
   /// Sends a [command] to the server
   ///
   /// Then returns the respose as a [String].
-  Future<String> sendCommand(String command) async {
+  Future<String?> sendCommand(String command) async {
     if (!_authed) {
-      throw new NotConnectedException();
+      throw NotConnectedException();
     }
 
-    int packetId = _id++;
-    Packet packet = new Packet(packetId, PacketType.EXECCOMMAND, command);
+    var packetId = _id++;
+    var packet = Packet(packetId, PacketType.EXECCOMMAND, command);
 
-    _socket.add(packet.bytes);
+    _socket.add(packet.bytes!);
     await _socket.flush();
 
-    Packet res = await firstWhereWithTimeout(
+    var res = await firstWhereWithTimeout(
       _packetStream,
       timeout,
       (Packet p) => p.type == PacketType.RESPONSE_VALUE && p.id == packetId,
