@@ -13,9 +13,11 @@ class PacketType {
   final _value;
   const PacketType._internal(this._value);
   int get value => _value;
+  @override
   String toString() => _value.toString();
 
-  static fromValue(int n, [Direction direction = Direction.CLIENTBOUND]) {
+  static PacketType? fromValue(int n,
+      [Direction direction = Direction.CLIENTBOUND]) {
     switch (n) {
       case 0:
         return PacketType.RESPONSE_VALUE;
@@ -26,7 +28,6 @@ class PacketType {
         } else {
           return PacketType.EXECCOMMAND;
         }
-        break;
 
       case 3:
         return PacketType.AUTH;
@@ -36,22 +37,22 @@ class PacketType {
     }
   }
 
-  static const RESPONSE_VALUE = const PacketType._internal(0);
-  static const EXECCOMMAND = const PacketType._internal(2);
-  static const AUTH_RESPONSE = const PacketType._internal(2);
-  static const AUTH = const PacketType._internal(3);
+  static const RESPONSE_VALUE = PacketType._internal(0);
+  static const EXECCOMMAND = PacketType._internal(2);
+  static const AUTH_RESPONSE = PacketType._internal(2);
+  static const AUTH = PacketType._internal(3);
 }
 
 class Packet {
-  int _id;
-  PacketType _type;
-  String _body;
-  Uint8List _bytes;
+  int? _id;
+  PacketType? _type;
+  String? _body;
+  Uint8List? _bytes;
 
-  int get id => _id;
-  PacketType get type => _type;
-  String get body => _body;
-  Uint8List get bytes => _bytes;
+  int? get id => _id;
+  PacketType? get type => _type;
+  String? get body => _body;
+  Uint8List? get bytes => _bytes;
 
   Packet(int id, PacketType type, String body)
       : _id = id,
@@ -60,16 +61,16 @@ class Packet {
         _bytes = _encodePacket(type, id, body);
 
   static Uint8List _encodePacket(PacketType type, int id, String body) {
-    Uint8List bodyByteList = utf8.encode(body);
+    var bodyByteList = utf8.encode(body) as Uint8List;
 
-    int size = bodyByteList.lengthInBytes + 14;
-    ByteData bytes = new ByteData(size);
+    var size = bodyByteList.lengthInBytes + 14;
+    var bytes = ByteData(size);
 
     bytes.setInt32(0, size - 4, Endian.little);
     bytes.setInt32(4, id, Endian.little);
     bytes.setInt32(8, type.value, Endian.little);
 
-    int i = 0;
+    var i = 0;
     for (var offs = 12; offs < size - 2; offs++) {
       bytes.setUint8(offs, bodyByteList[i]);
       i++;
@@ -82,24 +83,24 @@ class Packet {
 
   Packet.fromUint8List(Uint8List byteList) {
     _bytes = byteList;
-    ByteData bytes = byteList.buffer.asByteData();
+    var bytes = byteList.buffer.asByteData();
 
-    int size = bytes.getInt32(0, Endian.little);
+    var size = bytes.getInt32(0, Endian.little);
     if (size != bytes.lengthInBytes - 4) {
-      throw new InvalidPacketException(
-          "invalid packet lenght: expected ${bytes.lengthInBytes - 4} found: $size");
+      throw InvalidPacketException(
+          'invalid packet lenght: expected ${bytes.lengthInBytes - 4} found: $size');
     }
 
     _id = bytes.getInt32(4, Endian.little);
 
-    int intType = bytes.getInt32(8, Endian.little);
+    var intType = bytes.getInt32(8, Endian.little);
     _type = PacketType.fromValue(intType);
     if (_type == null) {
-      throw new InvalidPacketException("invalid type $intType");
+      throw InvalidPacketException('invalid type $intType');
     }
 
-    int bodyLength = byteList.lengthInBytes - 14;
-    Uint8List bodyBytes = new Uint8List(bodyLength);
+    var bodyLength = byteList.lengthInBytes - 14;
+    var bodyBytes = Uint8List(bodyLength);
     bodyBytes.setRange(0, bodyLength, byteList, 12);
 
     _body = utf8.decode(bodyBytes);

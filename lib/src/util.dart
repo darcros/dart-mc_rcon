@@ -1,9 +1,11 @@
+// ignore_for_file: unnecessary_new
+
 import 'dart:async';
 
 import 'package:mc_rcon/src/exceptions.dart';
 
 Stream<T> turnIntoBroadcastStream<T>(Stream<T> s) {
-  StreamController<T> controller = new StreamController.broadcast();
+  var controller = StreamController<T>.broadcast();
 
   s.listen(
     (data) => controller.add(data),
@@ -17,11 +19,11 @@ Stream<T> turnIntoBroadcastStream<T>(Stream<T> s) {
 Future<T> firstWhereWithTimeout<T>(
   Stream<T> stream,
   Duration timeout,
-  bool test(T element),
+  bool Function(T element) test,
 ) async {
-  Timer timer = new Timer(timeout, () => throw new TimeoutException());
+  var timer = new Timer(timeout, () => throw new TimeoutException());
 
-  T found = await stream.firstWhere(test);
+  var found = await stream.firstWhere(test);
 
   timer.cancel();
   return found;
