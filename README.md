@@ -1,3 +1,7 @@
+# Note
+
+This is a fork of the original repo which appears to be no longer supported. This version follows new Null-Safety standards set in Dart 2.12
+
 # mc_rcon
 
 A library for sending commands to Minecraft servers using the rcon protocol.
